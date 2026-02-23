@@ -1,0 +1,28 @@
+{
+    "registry_version": "1.0.0",
+    "last_updated": "2026-02-23",
+    "models": {
+        "video_efficientnet_v1": {
+            "version": "1.0.0",
+            "type": "video",
+            "backbone": "EfficientNet-B0",
+            "path": "src/models/video/efficientnet_v1.pth",
+            "description": "Baseline EfficientNet-B0 for key-frame analysis.",
+            "metrics": {
+                "auc": 0.0,
+                "eer": 0.0
+            }
+        },
+        "audio_wav2vec_v1": {
+            "version": "1.0.0",
+            "type": "audio",
+            "backbone": "wav2vec 2.0",
+            "path": "src/models/audio/wav2vec_v1.pth",
+            "description": "Baseline wav2vec 2.0 for audio spoofing detection.",
+            "metrics": {
+                "auc": 0.0,
+                "eer": 0.0
+            }
+        }
+    }
+}
