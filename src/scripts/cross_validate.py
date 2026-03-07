@@ -3,7 +3,7 @@ import sys
 import torch
 import json
 
-# Add root to path
+                  
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from src.models.video.xception import get_xception_model
@@ -39,6 +39,6 @@ def cross_dataset_eval(model_path, model_type, test_dataset_name, video_paths, l
     return report
 
 if __name__ == "__main__":
-    # Example usage (placeholders)
-    # cross_dataset_eval("models/xception_ff.pth", "xception", "DFDC", [...], [...])
+                                  
+                                                                                    
     pass

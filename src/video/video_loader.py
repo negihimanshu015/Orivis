@@ -23,11 +23,11 @@ class OrivisVideoDataset(Dataset):
         label = self.labels[idx]
         
         try:
-            # Process video to get (num_frames, C, H, W)
+                                                        
             video_tensor = self.pipeline.process_video(video_path, num_frames=self.num_frames)
         except Exception as e:
             print(f"Error processing {video_path}: {e}")
-            # Return zero tensor on error
+                                         
             video_tensor = torch.zeros((self.num_frames, 3, 224, 224))
             
         return video_tensor, torch.tensor(label, dtype=torch.long)

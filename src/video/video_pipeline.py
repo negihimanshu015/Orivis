@@ -26,29 +26,30 @@ class VideoPipeline:
             raise FileNotFoundError(f"Video file not found: {video_path}")
 
         cap = cv2.VideoCapture(video_path)
-        total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        
-        if total_frames <= 0:
-            return []
+        try:
+            total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            
+            if total_frames <= 0:
+                return []
 
-        # Calculate indices for frames at regular intervals
-        interval = max(1, total_frames // num_frames)
-        frame_indices = [i * interval for i in range(num_frames)]
+                                                               
+            interval = max(1, total_frames // num_frames)
+            frame_indices = [i * interval for i in range(num_frames)]
+            
+            frames = []
+            for idx in frame_indices:
+                cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+                ret, frame = cap.read()
+                if ret:
+                                                 
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    frames.append(frame)
+                else:
+                    break
+        finally:
+            cap.release()
         
-        frames = []
-        for idx in frame_indices:
-            cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
-            ret, frame = cap.read()
-            if ret:
-                # Convert BGR (OpenCV) to RGB
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frames.append(frame)
-            else:
-                break
-        
-        cap.release()
-        
-        # If we didn't get enough frames, pad with the last one or black frames
+                                                                               
         while len(frames) < num_frames:
             if frames:
                 frames.append(frames[-1])

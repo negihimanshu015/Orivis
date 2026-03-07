@@ -14,7 +14,7 @@ class RobustnessTester:
         Compress video using H.264 with specific CRF (Constant Rate Factor).
         Higher CRF means more compression/lower quality.
         """
-        # Requires ffmpeg installed on system. If not available, this will fail.
+                                                                                
         cmd = f"ffmpeg -i {video_path} -vcodec libx264 -crf {crf} {output_path} -y"
         os.system(cmd)
 

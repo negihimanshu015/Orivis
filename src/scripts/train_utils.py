@@ -2,12 +2,14 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader
+from tqdm import tqdm
 import os
 import sys
 import time
+import json
 from typing import Optional
 
-# Add root to path
+                  
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..')))
 
 from src.utils.metrics import calculate_metrics, print_metrics_report
@@ -19,7 +21,8 @@ def train_epoch(model, loader, criterion, optimizer, device):
     all_y_true = []
     all_y_scores = []
     
-    for inputs, labels in loader:
+    pbar = tqdm(loader, desc="Training", leave=False)
+    for inputs, labels in pbar:
         inputs, labels = inputs.to(device), labels.to(device)
         
         optimizer.zero_grad()
@@ -28,9 +31,11 @@ def train_epoch(model, loader, criterion, optimizer, device):
         loss.backward()
         optimizer.step()
         
+                             
         running_loss += loss.item() * inputs.size(0)
+        pbar.set_postfix(loss=loss.item())
         
-        # Collect for metrics (assuming binary classification with softmax outputs)
+                                                                                   
         probabilities = torch.softmax(outputs, dim=1)[:, 1]
         all_y_true.extend(labels.cpu().numpy())
         all_y_scores.extend(probabilities.detach().cpu().numpy())
@@ -45,8 +50,9 @@ def validate(model, loader, criterion, device):
     all_y_true = []
     all_y_scores = []
     
+    pbar = tqdm(loader, desc="Validating", leave=False)
     with torch.no_grad():
-        for inputs, labels in loader:
+        for inputs, labels in pbar:
             inputs, labels = inputs.to(device), labels.to(device)
             outputs = model(inputs)
             loss = criterion(outputs, labels)
@@ -66,10 +72,20 @@ def run_training(model, train_loader, val_loader, num_epochs=10, learning_rate=1
     
     model.to(device)
     best_val_auc = 0.0
+    history = []
     
     for epoch in range(num_epochs):
         train_loss, train_metrics = train_epoch(model, train_loader, criterion, optimizer, device)
         val_loss, val_metrics = validate(model, val_loader, criterion, device)
+        
+        epoch_stats = {
+            "epoch": epoch + 1,
+            "train_loss": train_loss,
+            "train_metrics": train_metrics,
+            "val_loss": val_loss,
+            "val_metrics": val_metrics
+        }
+        history.append(epoch_stats)
         
         print(f"Epoch {epoch+1}/{num_epochs}")
         print(f"Train Loss: {train_loss:.4f} | Train AUC: {train_metrics['auc']:.4f}")
@@ -79,5 +95,11 @@ def run_training(model, train_loader, val_loader, num_epochs=10, learning_rate=1
             best_val_auc = val_metrics['auc']
             torch.save(model.state_dict(), save_path)
             print(f"--> Saved best model with AUC: {best_val_auc:.4f}")
+            
+                          
+    history_path = save_path.replace(".pth", "_history.json")
+    with open(history_path, 'w') as f:
+        json.dump(history, f, indent=4)
+    print(f"--> Saved training history to: {history_path}")
             
     return best_val_auc

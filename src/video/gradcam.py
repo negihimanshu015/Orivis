@@ -43,11 +43,11 @@ class GradCAM:
         loss = output[0, class_idx]
         loss.backward()
 
-        # Weight the channels by the gradients
+                                              
         weights = torch.mean(self.gradients, dim=(2, 3), keepdim=True)
         cam = torch.sum(weights * self.activations, dim=1, keepdim=True)
         
-        # ReLU and normalization
+                                
         cam = F.relu(cam)
         cam = cam.squeeze().cpu().numpy()
         cam = (cam - cam.min()) / (cam.max() - cam.min() + 1e-8)
@@ -62,7 +62,7 @@ class GradCAM:
         heatmap = np.uint8(255 * heatmap)
         heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
         
-        # Convert BGR heatmap to RGB
+                                    
         heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
         
         overlayed_img = heatmap * 0.4 + img * 0.6

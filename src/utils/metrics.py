@@ -19,15 +19,15 @@ def calculate_metrics(y_true, y_scores, threshold=0.5):
     y_scores = np.array(y_scores)
     y_pred = (y_scores >= threshold).astype(int)
     
-    # Standard metrics
+                      
     fpr, tpr, thresholds = roc_curve(y_true, y_scores)
     roc_auc = auc(fpr, tpr)
     f1 = f1_score(y_true, y_pred)
     precision = precision_score(y_true, y_pred)
     recall = recall_score(y_true, y_pred)
     
-    # Equal Error Rate (EER)
-    # EER is where FPR == FNR (1 - TPR)
+                            
+                                       
     eer = brentq(lambda x : 1. - x - interp1d(fpr, tpr)(x), 0., 1.)
     eer_threshold = interp1d(fpr, thresholds)(eer)
     

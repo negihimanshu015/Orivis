@@ -40,14 +40,20 @@ venv.bak/
 # --- ML/Deep Learning Artifacts ---
 models/
 weights/
+results/
+checkpoints/
+Celeb-DF-v2/
 *.pth
 *.pt
+*.p
 *.h5
 *.pickle
 *.pkl
 datasets/
 data/
 !data/README.md
+audio_data/
+experiments/
 
 # --- IDEs and Editors ---
 .vscode/
@@ -62,3 +68,4 @@ logs/
 tmp/
 temp/
 plan.md
+test_results.txt

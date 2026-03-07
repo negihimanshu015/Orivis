@@ -1,0 +1,27 @@
+# Core ML and Deep Learning
+torch
+torchaudio
+torchvision
+timm
+
+# Video & Image Processing
+opencv-python
+numpy
+Pillow
+
+# Audio Processing
+librosa
+moviepy
+scipy
+soundfile
+PyYAML
+
+# Web Framework and API
+fastapi
+uvicorn
+python-multipart
+
+# Utilities & Metrics
+scikit-learn
+tqdm
+requests
