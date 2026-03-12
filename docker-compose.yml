@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  orivis-api:
+    build: .
+    container_name: orivis-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+      - ./results:/app/results
+    environment:
+      - DEVICE=cpu 
+    restart: always

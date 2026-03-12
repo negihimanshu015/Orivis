@@ -1,54 +1,63 @@
 # Orivis: Deepfake Detection System
 
-Orivis is a robust face forgery detection system designed to identify manipulated videos using state-of-the-art deep learning architectures.
+Orivis is a robust deepfake detection system designed to identify manipulated videos and audio using state-of-the-art multimodal fusion and visual saliency mapping (Grad-CAM).
+
+## Features
+- **Multimodal Fusion**: Combines video and audio forgery signals for high-accuracy detection.
+- **Asynchronous API**: Scalable backend using FastAPI and background tasks for non-blocking inference.
+- **Visual Saliency**: Generates Grad-CAM heatmaps to highlight forged regions in suspicious videos.
+- **Dockerized**: Easy deployment with single-command setup.
 
 ## Project Structure
-- `src/api`: FastAPI backend and endpoint definitions.
-- `src/audio`: Audio models, pipelines, and training logic.
-- `src/video`: Video models, pipelines, and evaluation utilities.
-- `src/fusion`: Multimodal fusion logic and pipeline.
-- `src/inference`: Inference services for audio and video.
-- `src/scripts`: Training, evaluation, and visualization scripts.
-- `src/utils`: Shared helper utilities (metrics).
+- `src/api`: FastAPI backend and background job management.
+- `src/fusion`: Multimodal weighting and pipeline logic.
+- `src/inference`: Service layers for video and audio models.
+- `src/video`: Xception-based video forgery detection.
+- `src/audio`: Audio spoofing detection services.
+- `results/`: Persistent storage for generated heatmaps.
 
-## Performance Results (Celeb-DF v2)
-The baseline Xception model achieves the following performance on the Celeb-DF v2 test split:
-- **AUC**: 0.9250
-- **EER**: 0.1500
-- **F1-Score**: 0.8144
+## Getting Started
 
-## Usage
+### Using Docker (Recommended)
+Launch the entire system with one command:
+```bash
+docker-compose up --build
+```
+The API will be available at `http://localhost:8000`.
 
-### 1. Training
-```powershell
-python src/scripts/train.py --data_dir <path_to_celebdf> --model_type xception --epochs 10
+### Local Development
+1. **Install Dependencies**:
+```bash
+pip install -r requirements.txt
+```
+2. **Run API**:
+```bash
+python src/api/main.py
 ```
 
-### 2. Full Evaluation
-Compute AUC, F1, and EER on the test split:
-```powershell
-python src/scripts/run_full_eval.py --model_path checkpoints/xception_best.pth --data_dir Celeb-DF-v2
+## API Usage
+
+### 1. Submit Detection Job
+```bash
+curl -X POST "http://localhost:8000/detect" -F "video=@your_video.mp4"
+```
+Returns a `job_id`.
+
+### 2. Check Status
+```bash
+curl "http://localhost:8000/job/{job_id}"
 ```
 
-### 3. Grad-CAM Visualization
-Generate saliency maps to visualize model focus:
-```powershell
-python src/scripts/run_gradcam_vis.py --video_path <video_path> --model_path checkpoints/xception_best.pth
+### 3. Retrieve Heatmap
+If a video is detected as suspicious, a heatmap is generated:
+`http://localhost:8000/results/heatmap_{job_id}.jpg`
+
+## CLI Tools
+Compute AUC, F1, and EER on the original Celeb-DF v2 test split:
+```bash
+python src/scripts/run_full_eval.py --model_path models/video_baseline.pth --data_dir Celeb-DF-v2
 ```
 
-### 4. Robustness Testing
-Evaluate model stability against compression, noise, and resizing:
-```powershell
-python src/scripts/run_robustness_test.py --model_path checkpoints/xception_best.pth --num_samples 20
-```
 
-## Robustness Insights
-- **Stable**: JPEG Compression (Q=50), Resizing (0.5x).
-- **Sensitive**: Gaussian Noise significantly degrades performance (AUC drops to ~0.54).
 
-## Cleanup & Ignored Files
-The `.gitignore` is configured to exclude:
-- `Celeb-DF-v2/` (Dataset)
-- `results/` (Inference artifacts & checkpoints)
-- `logs/` (Training logs)
-- `__pycache__` and other temp artifacts.
+
