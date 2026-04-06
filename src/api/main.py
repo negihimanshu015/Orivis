@@ -35,7 +35,7 @@ app.add_middleware(
 )
 
 try:
-    pipeline = FusionPipeline()
+    pipeline = FusionPipeline(video_weight=1.0, audio_weight=0.0)
 except Exception as e:
     print(f"Error initializing FusionPipeline: {e}")
     pipeline = None

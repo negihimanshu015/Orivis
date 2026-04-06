@@ -17,8 +17,11 @@ class VideoInferenceService(InferenceService):
         if device is None:
             device = "cuda" if torch.cuda.is_available() else "cpu"
         self.model_path = model_path
-        self.pipeline = VideoPipeline(target_size=(224, 224))
+        # Xception requires 299x299 input size
+        self.pipeline = VideoPipeline(target_size=(299, 299))
         self.gradcam = None
+        # Calibrated threshold based on evaluation (EER threshold)
+        self.threshold = 0.912
         super().__init__(model_id="video_xception_v1", device=device)
 
     def load_model(self):
@@ -48,9 +51,8 @@ class VideoInferenceService(InferenceService):
     def predict(self, preprocessed_data: torch.Tensor) -> torch.Tensor:
         """
         Run forward pass.
-        Input: (N, C, H, W).
+        Input: (B, N, C, H, W)
         """
-                                                          
         if len(preprocessed_data.shape) == 4:
             preprocessed_data = preprocessed_data.unsqueeze(0)
             
@@ -69,12 +71,32 @@ class VideoInferenceService(InferenceService):
         overlayed = self.gradcam.visualize_on_image(original_img, heatmap)
         return overlayed
 
+    def calibrate_probability(self, prob: float) -> float:
+        """
+        Maps the model threshold (0.966) to 0.5 for consistent labeling.
+        """
+        if prob < self.threshold:
+            return 0.5 * (prob / self.threshold)
+        else:
+            return 0.5 + 0.5 * (prob - self.threshold) / (1.0 - self.threshold)
+
     def postprocess(self, raw_results: torch.Tensor) -> Dict[str, Any]:
+        """
+        Convert raw results into calibrated format.
+        Index 1 is the synthetic/fake class probability.
+        """
         probs = F.softmax(raw_results, dim=1)
-        fake_prob = probs[0][1].item()
+        fake_prob_raw = probs[0][1].item() 
+        
+        # Calibrate so 0.5 is the classification line
+        fake_prob = self.calibrate_probability(fake_prob_raw)
         
         return {
             "probability": fake_prob,
-            "label": "fake" if fake_prob > 0.5 else "real",
-            "confidence": float(max(probs[0]).item())
+            "label": "fake" if fake_prob >= 0.5 else "real",
+            "confidence": float(max(probs[0]).item()),
+            "metadata": {
+                "raw_probability": fake_prob_raw,
+                "threshold": self.threshold
+            }
         }

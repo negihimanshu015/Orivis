@@ -46,10 +46,13 @@ class InferenceService(ABC):
         final_results = self.postprocess(raw_results)
         
         execution_time = time.time() - start_time
-        final_results["metadata"] = {
+        if "metadata" not in final_results:
+            final_results["metadata"] = {}
+            
+        final_results["metadata"].update({
             "model_id": self.model_id,
             "device": self.device,
             "execution_time_sec": execution_time
-        }
+        })
         
         return final_results

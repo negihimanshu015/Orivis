@@ -10,12 +10,12 @@ class VideoPipeline:
     """
     Utilities for video processing, including key-frame extraction and preprocessing.
     """
-    def __init__(self, target_size=(224, 224)):
+    def __init__(self, target_size=(299, 299)):
         self.target_size = target_size
         self.transform = transforms.Compose([
             transforms.Resize(self.target_size),
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+            transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
         ])
 
     def extract_keyframes(self, video_path: str, num_frames: int = 10) -> List[np.ndarray]:

@@ -2,14 +2,14 @@ import os
 import torch
 from torch.utils.data import Dataset, DataLoader
 from typing import List, Tuple, Optional
-from src.utils.video_pipeline import VideoPipeline
+from src.video.video_pipeline import VideoPipeline
 
 class OrivisVideoDataset(Dataset):
     """
     Standard PyTorch Dataset for Orivis video detection.
     Expects a list of video paths and corresponding labels.
     """
-    def __init__(self, video_paths: List[str], labels: List[int], num_frames: int = 10, target_size=(224, 224)):
+    def __init__(self, video_paths: List[str], labels: List[int], num_frames: int = 10, target_size=(299, 299)):
         self.video_paths = video_paths
         self.labels = labels
         self.num_frames = num_frames
@@ -23,12 +23,10 @@ class OrivisVideoDataset(Dataset):
         label = self.labels[idx]
         
         try:
-                                                        
             video_tensor = self.pipeline.process_video(video_path, num_frames=self.num_frames)
         except Exception as e:
             print(f"Error processing {video_path}: {e}")
-                                         
-            video_tensor = torch.zeros((self.num_frames, 3, 224, 224))
+            video_tensor = torch.zeros((self.num_frames, 3, 299, 299))
             
         return video_tensor, torch.tensor(label, dtype=torch.long)
 
