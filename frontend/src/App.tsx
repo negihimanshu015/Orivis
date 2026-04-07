@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import type { DragEvent, ChangeEvent } from 'react'
 import './index.css'
 
-const API_BASE = 'http://localhost:8000'
+const API_BASE = import.meta.env.VITE_API_BASEURL || 'http://localhost:8000'
 
 function App() {
     const [file, setFile] = useState<File | null>(null)

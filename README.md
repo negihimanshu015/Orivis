@@ -1,4 +1,15 @@
+---
+title: Orivis
+emoji: 🛡️
+colorFrom: orange
+colorTo: black
+sdk: docker
+app_port: 8000
+pinned: false
+---
+
 # Orivis: Deepfake Detection System
+
 
 Orivis is a robust deepfake detection system designed to identify manipulated videos and audio using state-of-the-art multimodal fusion and visual saliency mapping (Grad-CAM).
 
