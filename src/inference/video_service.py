@@ -37,6 +37,10 @@ class VideoInferenceService(InferenceService):
         self.model.to(self.device)
         self.model.eval()
         
+        for module in self.model.modules():
+            if hasattr(module, 'inplace'):
+                module.inplace = False
+        
         # Initialize Grad-CAM with target layer (block12 for Xception is a good choice)
         try:
             target_layer = self.model.backbone.block12.rep[-1] 

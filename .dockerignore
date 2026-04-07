@@ -1,0 +1,15 @@
+venv/
+__pycache__/
+*.pyc
+.git/
+.agents/
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+results/
+models/
+Test/
+Celeb-DF-v2/
+audio_data/
+experiments/

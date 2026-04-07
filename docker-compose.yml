@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   orivis-api:
     build: .
@@ -11,4 +9,15 @@ services:
       - ./results:/app/results
     environment:
       - DEVICE=cpu 
+    restart: always
+
+  orivis-frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: orivis-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - orivis-api
     restart: always

@@ -1,11 +1,8 @@
-# Core ML and Deep Learning
-torch
-torchaudio
-torchvision
+# Core ML and Deep Learning (Managed in Dockerfile for CPU optimization)
 timm
 
 # Video & Image Processing
-opencv-python
+opencv-python-headless
 numpy
 Pillow
 
@@ -24,4 +21,4 @@ python-multipart
 # Utilities & Metrics
 scikit-learn
 tqdm
-requests
+

@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+:root {
+    --orange: #ff6b00;
+    --black: #000000;
+    --white: #ffffff;
+}
+
+body {
+    font-family: 'Satoshi', sans-serif;
+    background-color: var(--white);
+    color: var(--black);
+}
+
+h1, h2, h3, h4, h5, h6, .brutalist-font {
+    font-family: 'Cabinet Grotesk', sans-serif;
+    text-transform: uppercase;
+}
+
+.brutalist-border {
+    border: 4px solid var(--black);
+    box-shadow: 8px 8px 0px var(--black);
+}
+
+.brutalist-border-small {
+    border: 2px solid var(--black);
+    box-shadow: 4px 4px 0px var(--black);
+}
+
+.orange-glow {
+    background-color: var(--orange);
+    color: var(--black);
+}
+
+.offset-card {
+    transition: all 0.2s ease-in-out;
+}
+
+.offset-card:hover {
+    transform: translate(-4px, -4px);
+    box-shadow: 12px 12px 0px var(--black);
+}

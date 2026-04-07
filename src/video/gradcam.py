@@ -16,14 +16,17 @@ class GradCAM:
         self.activations = None
         self.handlers = []
 
-        def save_gradient(module, grad_input, grad_output):
-            self.gradients = grad_output[0].clone().detach()
-
         def save_activation(module, input, output):
-            self.activations = output.clone().detach()
-
+            self.activations = output
+            
+            # Use tensor hooks to safely catch gradients flowing through this activation
+            def _store_grad(grad):
+                self.gradients = grad
+            
+            if output.requires_grad:
+                output.register_hook(_store_grad)
+                
         self.handlers.append(self.target_layer.register_forward_hook(save_activation))
-        self.handlers.append(self.target_layer.register_full_backward_hook(save_gradient))
 
     def remove_hooks(self):
         for handle in self.handlers:
@@ -34,6 +37,11 @@ class GradCAM:
         Generate localized heatmap for a specific class.
         """
         self.model.eval()
+        
+        # Ensure input tracks history to force gradient propagation to the target layer
+        input_tensor = input_tensor.clone().detach()
+        input_tensor.requires_grad_(True)
+        
         output = self.model(input_tensor)
         
         if class_idx is None:
@@ -49,7 +57,7 @@ class GradCAM:
         
                                 
         cam = F.relu(cam)
-        cam = cam.squeeze().cpu().numpy()
+        cam = cam.squeeze().cpu().detach().numpy()
         cam = (cam - cam.min()) / (cam.max() - cam.min() + 1e-8)
         
         return cam
