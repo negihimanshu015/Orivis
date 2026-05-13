@@ -1,4 +1,5 @@
 import torch
+import math
 import os
 import torch.nn.functional as F
 from src.inference.base import InferenceService
@@ -77,12 +78,21 @@ class VideoInferenceService(InferenceService):
 
     def calibrate_probability(self, prob: float) -> float:
         """
-        Maps the model threshold (0.966) to 0.5 for consistent labeling.
+        Pushes probabilities away from the threshold (0.912) to be more decisive.
+        Uses a sigmoid function with high gain to ensure scores around the threshold
+        jump to high/low confidence regions (~80-90%).
         """
-        if prob < self.threshold:
-            return 0.5 * (prob / self.threshold)
-        else:
-            return 0.5 + 0.5 * (prob - self.threshold) / (1.0 - self.threshold)
+        # Gain factor: higher = steeper jump from real to fake
+        gain = 500.0
+        diff = prob - self.threshold
+        
+        # Sigmoid function: 1 / (1 + exp(-gain * diff))
+        try:
+            calibrated = 1 / (1 + math.exp(-gain * diff))
+        except OverflowError:
+            calibrated = 1.0 if diff > 0 else 0.0
+            
+        return calibrated
 
     def postprocess(self, raw_results: torch.Tensor) -> Dict[str, Any]:
         """
@@ -94,6 +104,8 @@ class VideoInferenceService(InferenceService):
         
         # Calibrate so 0.5 is the classification line
         fake_prob = self.calibrate_probability(fake_prob_raw)
+        
+        print(f"DEBUG: Video Detection - Raw: {fake_prob_raw:.4f}, Calibrated: {fake_prob:.4f}, Threshold: {self.threshold}")
         
         return {
             "probability": fake_prob,

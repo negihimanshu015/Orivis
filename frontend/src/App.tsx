@@ -101,8 +101,10 @@ function App() {
     }, [jobId, status, startTime])
 
     // Derive visual values
-    const isFake = result?.label === 'fake' || (result?.final_synthetic_probability ? result.final_synthetic_probability > 0.5 : false);
-    const confidence = result?.final_synthetic_probability ? (result.final_synthetic_probability * 100).toFixed(1) : '0.0';
+    const displayProb = result?.final_synthetic_probability ?? 0.5;
+    const isFake = result?.label === 'fake' || displayProb > 0.5;
+    const confidenceScore = isFake ? displayProb : (1 - displayProb);
+    const confidence = (confidenceScore * 100).toFixed(1);
     const heatmapUrl = (result?.heatmap_url && isFake) ? `${API_BASE}${result.heatmap_url}` : null;
     const isProcessing = status === 'uploading' || status === 'queued' || status === 'processing';
 

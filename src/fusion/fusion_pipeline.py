@@ -41,8 +41,17 @@ class FusionPipeline:
         a_res = self.audio_service.run_inference(audio_target)
         audio_prob = a_res.get("probability", 0.5)
         
-        # Weighted Fusion
-        results = self.fusion.get_weighted_prediction(video_prob, audio_prob)
+        # Dynamic Fusion: Bypass if audio is missing/silent
+        if a_res.get("metadata", {}).get("is_silent"):
+            results = {
+                "video_probability": float(video_prob),
+                "audio_probability": float(audio_prob),
+                "final_synthetic_probability": float(video_prob),
+                "label": "fake" if video_prob > 0.5 else "real"
+            }
+        else:
+            # Weighted Fusion
+            results = self.fusion.get_weighted_prediction(video_prob, audio_prob)
         
         # Add detailed results
         results["video_details"] = v_res

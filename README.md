@@ -1,8 +1,8 @@
 ---
 title: Orivis
 emoji: 🛡️
-colorFrom: orange
-colorTo: black
+colorFrom: yellow
+colorTo: gray
 sdk: docker
 app_port: 8000
 pinned: false

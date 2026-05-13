@@ -32,18 +32,22 @@ class VideoPipeline:
             if total_frames <= 0:
                 return []
 
-                                                               
             interval = max(1, total_frames // num_frames)
             frame_indices = [i * interval for i in range(num_frames)]
-            
+
+            # Sequential read is more robust than cap.set() across different OS backends
             frames = []
-            for idx in frame_indices:
-                cap.set(cv2.CAP_PROP_POS_FRAMES, idx)
+            frame_idx = 0
+            for target_idx in frame_indices:
+                while frame_idx < target_idx:
+                    cap.read()  # Skip frames
+                    frame_idx += 1
+                
                 ret, frame = cap.read()
                 if ret:
-                                                 
                     frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     frames.append(frame)
+                    frame_idx += 1
                 else:
                     break
         finally:

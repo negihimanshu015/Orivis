@@ -1,4 +1,5 @@
 import torch
+import math
 import os
 from src.inference.base import InferenceService
 from src.audio.audio_model import SimpleAudioCNN
@@ -52,12 +53,17 @@ class AudioInferenceService(InferenceService):
 
     def calibrate_probability(self, prob: float) -> float:
         """
-        Maps the model threshold (0.95) to 0.5 for consistent labeling.
+        Pushes probabilities away from the threshold (0.95) to be more decisive.
         """
-        if prob < self.threshold:
-            return 0.5 * (prob / self.threshold)
-        else:
-            return 0.5 + 0.5 * (prob - self.threshold) / (1.0 - self.threshold)
+        gain = 200.0 # Slightly lower gain for audio to keep it distinct
+        diff = prob - self.threshold
+        
+        try:
+            calibrated = 1 / (1 + math.exp(-gain * diff))
+        except OverflowError:
+            calibrated = 1.0 if diff > 0 else 0.0
+            
+        return calibrated
 
     def postprocess(self, raw_results: torch.Tensor) -> Dict[str, Any]:
         """
@@ -77,6 +83,7 @@ class AudioInferenceService(InferenceService):
             "confidence": float(fake_prob_raw if fake_prob_raw > self.threshold else 1 - fake_prob_raw),
             "metadata": {
                 "raw_probability": fake_prob_raw,
-                "threshold": self.threshold
+                "threshold": self.threshold,
+                "is_silent": getattr(self, '_is_silent', False)
             }
         }

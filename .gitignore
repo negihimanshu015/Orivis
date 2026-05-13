@@ -38,16 +38,15 @@ venv.bak/
 *.ipynb_checkpoints
 
 # --- ML/Deep Learning Artifacts ---
-models/
-weights/
+# models/ (Allowed for deployment)
 results/
 checkpoints/
 Celeb-DF-v2/
-*.pth
-*.pt
+# *.pth (Allowed for deployment via LFS)
+# *.pt (Allowed for deployment via LFS)
 *.p
 *.h5
-*.pickle
+# *.pickle (Allowed for deployment via LFS)
 *.pkl
 datasets/
 data/
